@@ -106,17 +106,20 @@ namespace nodes {
     
     class NOT : public component {
     public:
-        bool * INptr[1], INval[1], OUTval[1];
+        bool * INptr[1], INval[1], OUTval[1] = {&OFF};
         int IN, OUT;
         node_ptr_vector intern;
         void getInputs() {
             for(int i = 0; i < IN; i++){
                 INval[i] = *(INptr[i]);
             }
+
+            intern.getInputs();
         };
         
         void getOutputs() {
             OUTval[0] = !(INval[0]);
+            intern.getOutputs();
         };
 
         void quickCompute() {

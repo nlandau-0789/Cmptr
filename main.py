@@ -1,13 +1,14 @@
 def xtract_name(cpnnt):
     return "".join(i for i in cpnnt if not i.isnumeric())
 
-def make_class(NAME, IN, OUT, FORMULAS):
+def make_class(line):
     """
     IN/OUT => NUMBER of bool inputs/outputs
     FORMULAS => separated by " | "
     nodes in formulas should be written like this : NAME[id]-[output id] (NOT1-1) par exemple 
     (output id starts at 1)
     """
+    NAME, IN, OUT, FORMULAS = line.split(maxsplit=3)
     IN, OUT = int(IN), int(OUT)
     constructor_args = ", ".join([f"bool * IN{i+1} = &OFF" for i in range(IN)])
     INptr_init = f"{{{','.join([f'IN{i+1}' for i in range(IN)])}}}"
@@ -186,7 +187,7 @@ body = [
     "NOT 1 1 NAND(IN1)",
 ]
 
-body = map(lambda x : make_class(*x.split(maxsplit=3)), body)
+body = map(make_class, body)
 body = "\n".join(body)
 
 with open("main.cpp", "w") as f:
