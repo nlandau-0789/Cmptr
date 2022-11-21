@@ -1,4 +1,4 @@
-def xtrac_name(cpnnt):
+def xtract_name(cpnnt):
     return "".join(i for i in cpnnt if not i.isnumeric())
 
 def make_class(NAME, IN, OUT, FORMULAS):
@@ -9,10 +9,9 @@ def make_class(NAME, IN, OUT, FORMULAS):
     (output id starts at 1)
     """
     IN, OUT = int(IN), int(OUT)
-    bools_ = ", ".join([f"*IN{i+1}" for i in range(IN)] + [f"OUT{i+1}" for i in range(OUT)])
-    constructor = ", ".join([f"bool * IN{i+1} = &OFF" for i in range(IN)])
-    lcons = f"{{{','.join([f'IN{i+1}' for i in range(IN)])}}}"
-    rq_intr = list(set(map(lambda x: x.split("-")[0], FORMULAS.replace("("," ").replace(")"," ").replace(","," ").split(" "))))
+    constructor_args = ", ".join([f"bool * IN{i+1} = &OFF" for i in range(IN)])
+    INptr_init = f"{{{','.join([f'IN{i+1}' for i in range(IN)])}}}"
+    components = sorted(list(set(map(lambda x: x.split("-")[0], FORMULAS.replace("("," ").replace(")"," ").replace(","," ").split(" ")))))
     #for i in range(len(rq_intr)):
     #    FORMULAS=FORMULAS.replace(rq_intr[i], f"intern[i]->OUTval[0]")
     FORMULAS = FORMULAS.split(" | ")
@@ -20,17 +19,20 @@ def make_class(NAME, IN, OUT, FORMULAS):
     
     class {NAME} : public component {{
     public:
-        bool * INptr[{IN}], INval[{IN}], OUTval[{OUT}];
+        bool * INptr[{IN}], INval[{IN}], OUTval[{OUT}] = {{&OFF}};
         int IN, OUT;
         node_ptr_vector intern;
         void getInputs() {{
             for(int i = 0; i < IN; i++){{
                 INval[i] = *(INptr[i]);
             }}
+
+            intern.getInputs();
         }};
         
         void getOutputs() {{
             OUTval[0] = !(INval[0]);
+            intern.getOutputs();
         }};
 
         void quickCompute() {{
@@ -38,7 +40,7 @@ def make_class(NAME, IN, OUT, FORMULAS):
             getOutputs();
         }}
         
-        {NAME}({constructor}):INptr{lcons}, IN({IN}), OUT({OUT}) {{
+        {NAME}({constructor_args}):INptr{INptr_init}, IN({IN}), OUT({OUT}) {{
             
         }};
 
