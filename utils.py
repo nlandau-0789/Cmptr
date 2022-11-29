@@ -1,7 +1,9 @@
 def parse_component(c):
     if "-" in c:
         name, out = c.split("-")
-        return f"{name}[{out}]"
+        if name == "INval":
+            return f"&{name}[{out}]"
+        return f"&{name}.OUTval[{out}]"
     i = 0
     name = ""
     ID = ""
@@ -19,5 +21,18 @@ def precook_component(c, sep = ">>>", input_sep = ","):
     """
     inputs, component = map(str.strip, c.split(sep))
     inputs = map(lambda x: parse_component(x.strip()), inputs.split(input_sep))
+    component = parse_component(component)
+    return (inputs, component)
+
+def cook(c):
+    """
+    transforms a precooked component to a parsed c++ line
+    """
+    c = precook_component(c)
+    line = f"""intern.pushback(new {c[1][0]}({', '.join(c[0])}));
+{c[1][0]} & {c[1][0]}{c[1][1]} = *(intern.back());"""
+    return line
     
-    
+if __name__ == "__main__":
+    to_cook = "INval-0, INval-1 >>> NAND1"
+    print(cook(to_cook))
