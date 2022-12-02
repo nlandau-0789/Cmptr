@@ -29,10 +29,19 @@ def cook(c):
     transforms a precooked component to a parsed c++ line
     """
     c = precook_component(c)
-    line = f"""intern.pushback(new {c[1][0]}({', '.join(c[0])}));
-{c[1][0]} & {c[1][0]}{c[1][1]} = *(intern.back());"""
+    line = f"""\t\t\tintern.pushback(new {c[1][0]}({', '.join(c[0])}));
+\t\t\t{c[1][0]} & {c[1][0]}{c[1][1]} = *(intern.back());"""
     return line
+
+def multicook(cs, sep = '|'):
+    """
+    cs : components separated by sep
+    """
+    cs = list(map(str.strip, cs.split(sep)))
+    cs = list(map(cook, cs))
+    return "\n".join(cs)
     
+
 if __name__ == "__main__":
     to_cook = "INval-0, INval-1 >>> NAND1"
     print(cook(to_cook))
